@@ -1,0 +1,82 @@
+# Node / Yarn / PNPM
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+!/.env.example
+
+# React Native
+android/
+ios/
+*.ipa
+*.apk
+*.aab
+# Xcode
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Android/IntelliJ
+build/
+.idea/
+.gradle/
+local.properties
+*.iml
+*.hprof
+*.keystore
+captures/
+app/build/
+
+# Metro Bundler
+.metro-cache
+
+# Temporary files
+*.swp
+*~
+*.bak
+
+# OS-specific
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Jest
+/coverage
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js (if ever used for web)
+.next/
+out/
+
+# Expo (if ever used)
+.expo/
+dist/
+web-build/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
