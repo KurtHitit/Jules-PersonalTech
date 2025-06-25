@@ -12,10 +12,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send('My Belongings Hub Backend is running!');
 });
 
-// TODO: Add other routes (e.g., itemRoutes, userRoutes)
-// Example:
-// import itemRoutes from './routes/itemRoutes';
-// app.use('/api/items', itemRoutes);
+// Add item routes
+import itemRoutes from './routes/itemRoutes';
+app.use('/api/items', itemRoutes);
+
+// TODO: Add other routes (e.g., userRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
