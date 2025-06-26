@@ -1,7 +1,7 @@
 // backend/src/controllers/authController.ts
 import { Request, Response } from 'express';
-import * as userService from '../services/userService'; // To be created
-import { User, comparePassword } from '../models/User';
+import * as userService from '../services/userService';
+import User, { IUser, comparePasswordUtility } from '../models/User'; // Import Mongoose User model and IUser
 import { generateToken } from '../utils/jwtUtils';
 // Basic validation, can be replaced with a library like express-validator
 import { validationResult, body } from 'express-validator'; // Example, not fully implemented yet
@@ -86,13 +86,16 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await userService.findUserByEmail(email);
     if (!user) {
-      res.status(401).json({ message: 'Invalid credentials (user not found)' }); // Generic message
+      res.status(401).json({ message: 'Invalid credentials' }); // Generic message for security
       return;
     }
 
-    const isMatch = await comparePassword(password, user.passwordHash);
+    // Use the instance method from the Mongoose user document if available and preferred,
+    // or use the utility function. Sticking to utility for consistency with hashing.
+    const isMatch = await user.matchPassword(password); // Using instance method
+    // const isMatch = await comparePasswordUtility(password, user.passwordHash); // Or using utility
     if (!isMatch) {
-      res.status(401).json({ message: 'Invalid credentials (password mismatch)' }); // Generic message
+      res.status(401).json({ message: 'Invalid credentials' }); // Generic message
       return;
     }
 

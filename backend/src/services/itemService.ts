@@ -1,150 +1,147 @@
 // backend/src/services/itemService.ts
-import { Item, createMockItem, ItemPhoto, ItemDocument } from '../models/Item';
+import Item, { IItem, IItemPhoto, IItemDocument } from '../models/Item'; // Import Mongoose Item model and IItem interface
+import mongoose from 'mongoose'; // For ObjectId validation if needed
 
-// This is a placeholder service. In a real application, this service would
-// interact with a database (e.g., using an ORM like Prisma, TypeORM, or Mongoose).
+// DTO for creating an item. All fields from IItem except auto-generated ones.
+// Ensure this aligns with what the client sends and what the Item schema expects.
+export type CreateItemDTO = Omit<IItem, '_id' | 'createdAt' | 'updatedAt' | 'userId'> & {
+  // Explicitly define optional fields if they are part of the DTO but not strictly required by schema initially
+  // For example, if photos/documents can be added later or are optional:
+  photos?: IItemPhoto[];
+  documents?: IItemDocument[];
+};
 
-// Mock database (in-memory array for now)
-let mockItemsDB: Item[] = [
-  createMockItem({
-    id: 'item-1',
-    userId: 'user-123',
-    name: 'MacBook Pro 16"',
-    category: 'Electronics',
-    brand: 'Apple',
-    model: 'M1 Max',
-    serialNumber: 'C02F1234ABCD',
-    purchaseDate: new Date('2022-01-15'),
-    purchasePrice: 2499,
-    currency: 'USD',
-    retailer: 'Apple Store',
-    notes: 'Used for development work.',
-    photos: [{ url: 'http://example.com/macbook.jpg', caption: 'Laptop on desk' }],
-    documents: [
-      { url: 'http://example.com/receipt.pdf', filename: 'macbook_receipt.pdf', type: 'receipt' },
-      { url: 'http://example.com/warranty.pdf', filename: 'macbook_applecare.pdf', type: 'warranty' },
-    ],
-  }),
-  createMockItem({
-    id: 'item-2',
-    userId: 'user-123',
-    name: 'Sony WH-1000XM4 Headphones',
-    category: 'Electronics',
-    brand: 'Sony',
-    model: 'WH-1000XM4',
-    serialNumber: 'S01-1234567-A',
-    purchaseDate: new Date('2021-11-20'),
-    purchasePrice: 348,
-    currency: 'USD',
-    retailer: 'Amazon',
-    notes: 'Noise-cancelling headphones, great for travel.',
-  }),
-  createMockItem({
-    id: 'item-3',
-    userId: 'user-456', // Different user
-    name: 'Old Toaster',
-    category: 'Appliance',
-    brand: 'GenericBrand',
-    model: 'T-100',
-  }),
-];
+// DTO for updating an item. All fields are optional.
+export type UpdateItemDTO = Partial<CreateItemDTO>;
+
 
 /**
- * Creates a new item.
- * In a real app, this would save to a database and associate with the actual user.
- * @param itemData Partial data for the new item.
+ * Creates a new item in the database for a specific user.
+ * @param itemData Data for the new item.
  * @param userId The ID of the user creating the item.
- * @returns The newly created item.
+ * @returns The newly created item Mongoose document.
  */
-export const createItem = async (
-  itemData: Partial<Omit<Item, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
-  userId: string
-): Promise<Item> => {
-  console.log(`[Service] Attempting to create item for user ${userId} with data:`, itemData);
-  const newItem = createMockItem({
+export const createItem = async (itemData: CreateItemDTO, userId: string): Promise<IItem> => {
+  console.log(`[ItemService Mongoose] Creating item for user ${userId}: ${itemData.name}`);
+
+  const newItem = new Item({
     ...itemData,
-    userId, // Ensure the correct userId is set
+    userId: new mongoose.Types.ObjectId(userId), // Ensure userId is a valid ObjectId
   });
-  mockItemsDB.push(newItem);
-  console.log(`[Service] Item created with ID: ${newItem.id}`);
+
+  await newItem.save();
+  console.log(`[ItemService Mongoose] Item created with ID: ${newItem._id}`);
   return newItem;
 };
 
 /**
- * Retrieves all items for a specific user.
+ * Retrieves all items for a specific user from the database.
  * @param userId The ID of the user whose items are to be retrieved.
- * @returns A list of items belonging to the user.
+ * @returns A list of item Mongoose documents belonging to the user.
  */
-export const getItemsByUserId = async (userId: string): Promise<Item[]> => {
-  console.log(`[Service] Fetching items for user ID: ${userId}`);
-  const userItems = mockItemsDB.filter(item => item.userId === userId);
-  console.log(`[Service] Found ${userItems.length} items for user ${userId}.`);
-  return userItems;
+export const getItemsByUserId = async (userId: string): Promise<IItem[]> => {
+  console.log(`[ItemService Mongoose] Fetching items for user ID: ${userId}`);
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.warn(`[ItemService Mongoose] Invalid ObjectId for userId: ${userId} in getItemsByUserId`);
+      return []; // Or throw an error
+  }
+  const items = await Item.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 }).exec(); // Sort by newest first
+  console.log(`[ItemService Mongoose] Found ${items.length} items for user ${userId}.`);
+  return items;
 };
 
 /**
  * Retrieves a single item by its ID, ensuring it belongs to the specified user.
  * @param itemId The ID of the item to retrieve.
  * @param userId The ID of the user requesting the item (for ownership check).
- * @returns The item if found and owned by the user, otherwise null.
+ * @returns The item Mongoose document if found and owned by the user, otherwise null.
  */
-export const getItemById = async (itemId: string, userId: string): Promise<Item | null> => {
-  console.log(`[Service] Fetching item with ID: ${itemId} for user ID: ${userId}`);
-  const item = mockItemsDB.find(i => i.id === itemId && i.userId === userId);
-  if (item) {
-    console.log(`[Service] Item found:`, item);
-    return item;
-  }
-  console.log(`[Service] Item with ID ${itemId} not found for user ${userId}.`);
-  return null;
-};
-
-/**
- * Updates an existing item.
- * @param itemId The ID of the item to update.
- * @param updates Partial data containing the updates.
- * @param userId The ID of the user attempting the update (for ownership check).
- * @returns The updated item, or null if not found or not owned by the user.
- */
-export const updateItem = async (
-  itemId: string,
-  updates: Partial<Omit<Item, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
-  userId: string
-): Promise<Item | null> => {
-  console.log(`[Service] Attempting to update item ID: ${itemId} for user ${userId} with updates:`, updates);
-  const itemIndex = mockItemsDB.findIndex(i => i.id === itemId && i.userId === userId);
-
-  if (itemIndex === -1) {
-    console.log(`[Service] Item ID ${itemId} not found for user ${userId} or user does not own it. Update failed.`);
+export const getItemById = async (itemId: string, userId: string): Promise<IItem | null> => {
+  console.log(`[ItemService Mongoose] Fetching item ID: ${itemId} for user ID: ${userId}`);
+  if (!mongoose.Types.ObjectId.isValid(itemId) || !mongoose.Types.ObjectId.isValid(userId)) {
+    console.warn(`[ItemService Mongoose] Invalid ObjectId format for itemId or userId.`);
     return null;
   }
 
-  const originalItem = mockItemsDB[itemIndex];
-  const updatedItem: Item = {
-    ...originalItem,
-    ...updates,
-    updatedAt: new Date(), // Ensure updatedAt is updated
-  };
-  mockItemsDB[itemIndex] = updatedItem;
-  console.log(`[Service] Item ID ${itemId} updated successfully:`, updatedItem);
+  const item = await Item.findOne({
+    _id: new mongoose.Types.ObjectId(itemId),
+    userId: new mongoose.Types.ObjectId(userId)
+  }).exec();
+
+  if (item) {
+    console.log(`[ItemService Mongoose] Item found: ${item.name}`);
+  } else {
+    console.log(`[ItemService Mongoose] Item with ID ${itemId} not found for user ${userId}.`);
+  }
+  return item;
+};
+
+/**
+ * Updates an existing item in the database.
+ * @param itemId The ID of the item to update.
+ * @param updates Partial data containing the updates.
+ * @param userId The ID of the user attempting the update (for ownership check).
+ * @returns The updated item Mongoose document, or null if not found or not owned.
+ */
+export const updateItem = async (
+  itemId: string,
+  updates: UpdateItemDTO,
+  userId: string
+): Promise<IItem | null> => {
+  console.log(`[ItemService Mongoose] Updating item ID: ${itemId} for user ${userId}`);
+  if (!mongoose.Types.ObjectId.isValid(itemId) || !mongoose.Types.ObjectId.isValid(userId)) {
+    console.warn(`[ItemService Mongoose] Invalid ObjectId format for itemId or userId in updateItem.`);
+    return null;
+  }
+
+  // Find and update the item, ensuring it belongs to the user.
+  // { new: true } option returns the modified document rather than the original.
+  const updatedItem = await Item.findOneAndUpdate(
+    { _id: new mongoose.Types.ObjectId(itemId), userId: new mongoose.Types.ObjectId(userId) },
+    { $set: updates }, // Use $set to apply updates
+    { new: true, runValidators: true } // runValidators ensures schema validations are checked on update
+  ).exec();
+
+  if (updatedItem) {
+    console.log(`[ItemService Mongoose] Item ID ${itemId} updated successfully.`);
+  } else {
+    console.log(`[ItemService Mongoose] Item ID ${itemId} not found for user ${userId} or update failed.`);
+  }
   return updatedItem;
 };
 
 /**
- * Deletes an item by its ID.
+ * Deletes an item by its ID from the database.
  * @param itemId The ID of the item to delete.
  * @param userId The ID of the user attempting deletion (for ownership check).
- * @returns True if deletion was successful, false otherwise.
+ * @returns True if deletion was successful (item found and deleted), false otherwise.
  */
 export const deleteItem = async (itemId: string, userId: string): Promise<boolean> => {
-  console.log(`[Service] Attempting to delete item ID: ${itemId} for user ${userId}`);
-  const initialLength = mockItemsDB.length;
-  mockItemsDB = mockItemsDB.filter(i => !(i.id === itemId && i.userId === userId));
+  console.log(`[ItemService Mongoose] Deleting item ID: ${itemId} for user ${userId}`);
+   if (!mongoose.Types.ObjectId.isValid(itemId) || !mongoose.Types.ObjectId.isValid(userId)) {
+    console.warn(`[ItemService Mongoose] Invalid ObjectId format for itemId or userId in deleteItem.`);
+    return false;
+  }
 
-  if (mockItemsDB.length < initialLength) {
-    console.log(`[Service] Item ID ${itemId} deleted successfully for user ${userId}.`);
+  const result = await Item.deleteOne({
+    _id: new mongoose.Types.ObjectId(itemId),
+    userId: new mongoose.Types.ObjectId(userId)
+  }).exec();
+
+  if (result.deletedCount && result.deletedCount > 0) {
+    console.log(`[ItemService Mongoose] Item ID ${itemId} deleted successfully for user ${userId}.`);
     return true;
   }
-  console.log(`[Service] Item ID ${itemId} not found for user ${userId} or user does not own it. Deletion failed.`);
+  console.log(`[ItemService Mongoose] Item ID ${itemId} not found for user ${userId} or deletion failed.`);
   return false;
+};
+
+// Helper for clearing items during tests (if using a test database)
+export const _clearItemsForTesting = async (): Promise<void> => {
+  if (process.env.NODE_ENV === 'test') {
+    console.log('[ItemService Mongoose Test] Clearing all items from database.');
+    await Item.deleteMany({});
+  } else {
+    console.warn('[ItemService Mongoose Test] _clearItemsForTesting should only be called in test environments.');
+  }
 };
