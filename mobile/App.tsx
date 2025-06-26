@@ -7,10 +7,22 @@ NativeWindStyleSheet.setOutput({
   default: 'native',
 });
 
+import React from 'react';
 import AppNavigator from '@/navigation/AppNavigator';
+import { AuthProvider } from '@/context/AuthContext';
+import { NativeWindStyleSheet } from 'nativewind';
+
+// Required for NativeWind
+NativeWindStyleSheet.setOutput({
+  default: 'native',
+});
 
 const App = () => {
-  return <AppNavigator />;
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
+  );
 };
 
 export default App;

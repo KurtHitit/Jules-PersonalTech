@@ -11,122 +11,103 @@ export type Item = BackendItem;
 export type { ItemPhoto, ItemDocument };
 
 
-// For now, this service will return mock data.
-// Later, it will be updated to make API calls to the backend.
+import apiClient from './apiClient'; // Import the configured Axios instance
 
-const mockMobileItemsDB: Item[] = [
-  {
-    id: 'mobile-item-1',
-    userId: 'user-123',
-    name: 'Smartphone X',
-    category: 'Electronics',
-    brand: 'MobileBrand',
-    model: 'X2024',
-    serialNumber: 'MB0123456789',
-    purchaseDate: new Date('2023-05-10'),
-    purchasePrice: 799,
-    currency: 'USD',
-    retailer: 'Tech Store Online',
-    notes: 'Primary mobile device. Good camera.',
-    photos: [{ url: 'http://example.com/smartphone.jpg', caption: 'Front view' }],
-    documents: [
-      { url: 'http://example.com/receipt_phone.pdf', filename: 'phone_receipt.pdf', type: 'receipt' },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'mobile-item-2',
-    userId: 'user-123',
-    name: 'Wireless Earbuds Pro',
-    category: 'Electronics',
-    brand: 'AudioGood',
-    model: 'BudsPro V2',
-    serialNumber: 'AGBPV2-987654',
-    purchaseDate: new Date('2023-08-22'),
-    purchasePrice: 199,
-    currency: 'USD',
-    retailer: 'Amazon',
-    notes: 'Used for calls and music.',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+// Type for the data structure when creating an item (payload for POST /items)
+// This should match the backend's expectation, excluding server-generated fields.
+export type NewItemData = Omit<Item, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+// If photos and documents are optional or handled differently during creation:
+// export type NewItemData = Omit<Item, 'id'|'userId'|'createdAt'|'updatedAt'|'photos'|'documents'> & {
+//   photos?: ItemPhoto[];
+//   documents?: ItemDocument[];
+// };
+
 
 /**
- * Fetches a list of items.
- * Currently returns mock data.
+ * Fetches a list of items from the backend.
+ * Requires authentication (token is added by apiClient interceptor).
  */
 export const fetchItems = async (): Promise<Item[]> => {
-  console.log('[Mobile Service] Fetching items...');
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 700));
-  console.log('[Mobile Service] Mock items fetched:', mockMobileItemsDB);
-  return [...mockMobileItemsDB]; // Return a copy to prevent direct mutation
+  console.log('[ItemService API] Fetching items...');
+  try {
+    const response = await apiClient.get<{ items: Item[] }>('/items'); // Assuming backend returns { items: [...] }
+    // If backend returns just the array: const response = await apiClient.get<Item[]>('/items');
+    console.log('[ItemService API] Items fetched successfully.');
+    return response.data.items || response.data; // Adjust based on backend response structure
+  } catch (error: any) {
+    console.error('[ItemService API] Failed to fetch items:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch items.');
+  }
 };
 
 /**
- * Adds a new item.
- * Currently simulates adding to a mock list.
- * @param itemData Data for the new item (excluding id, userId, createdAt, updatedAt which backend would handle)
+ * Adds a new item via the backend API.
+ * Requires authentication.
+ * @param itemData Data for the new item.
  */
-export const addItem = async (
-  itemData: Omit<Item, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'photos' | 'documents'> & { photos?: ItemPhoto[], documents?: ItemDocument[] }
-): Promise<Item> => {
-  console.log('[Mobile Service] Adding item:', itemData);
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const newItem: Item = {
-    id: `mobile-item-${Date.now()}`, // Simple unique ID for mock
-    userId: 'user-123', // Mock user ID
-    ...itemData,
-    photos: itemData.photos || [],
-    documents: itemData.documents || [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  mockMobileItemsDB.push(newItem);
-  console.log('[Mobile Service] Item added (mock):', newItem);
-  return newItem;
+export const addItem = async (itemData: NewItemData): Promise<Item> => {
+  console.log('[ItemService API] Adding item:', itemData.name);
+  try {
+    const response = await apiClient.post<{ item: Item }>('/items', itemData); // Assuming backend returns { item: ... }
+    // If backend returns just the created item: const response = await apiClient.post<Item>('/items', itemData);
+    console.log('[ItemService API] Item added successfully:', response.data.item?.name || response.data.name);
+    return response.data.item || response.data; // Adjust based on backend response structure
+  } catch (error: any) {
+    console.error('[ItemService API] Failed to add item:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to add item.');
+  }
 };
 
 /**
- * Fetches a single item by its ID.
- * Currently returns mock data.
+ * Fetches a single item by its ID from the backend.
+ * Requires authentication.
  */
 export const getItemById = async (itemId: string): Promise<Item | null> => {
-  console.log(`[Mobile Service] Fetching item by ID: ${itemId}`);
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const item = mockMobileItemsDB.find(i => i.id === itemId);
-  if (item) {
-    console.log('[Mobile Service] Item found:', item);
-    return { ...item }; // Return a copy
+  console.log(`[ItemService API] Fetching item by ID: ${itemId}`);
+  try {
+    const response = await apiClient.get<{ item: Item }>(`/items/${itemId}`); // Assuming backend returns { item: ... }
+    // If backend returns just the item: const response = await apiClient.get<Item>(`/items/${itemId}`);
+    console.log('[ItemService API] Single item fetched successfully:', response.data.item?.name || response.data.name);
+    return response.data.item || response.data; // Adjust
+  } catch (error: any) {
+    console.error(`[ItemService API] Failed to fetch item ${itemId}:`, error.response?.data?.message || error.message);
+    if (error.response?.status === 404) {
+      return null; // Item not found
+    }
+    throw new Error(error.response?.data?.message || `Failed to fetch item ${itemId}.`);
   }
-  console.log(`[Mobile Service] Item with ID ${itemId} not found.`);
-  return null;
 };
 
-// Add other service functions as needed (updateItem, deleteItem)
-// For example:
-/*
-export const updateItem = async (itemId: string, updates: Partial<Item>): Promise<Item | null> => {
-  console.log(`[Mobile Service] Updating item ${itemId} with`, updates);
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const itemIndex = mockMobileItemsDB.findIndex(i => i.id === itemId);
-  if (itemIndex > -1) {
-    mockMobileItemsDB[itemIndex] = { ...mockMobileItemsDB[itemIndex], ...updates, updatedAt: new Date() };
-    console.log('[Mobile Service] Item updated (mock):', mockMobileItemsDB[itemIndex]);
-    return { ...mockMobileItemsDB[itemIndex] };
+/**
+ * Updates an existing item via the backend API.
+ * Requires authentication.
+ * @param itemId The ID of the item to update.
+ * @param updates Partial data containing the updates for the item.
+ */
+export const updateItem = async (itemId: string, updates: Partial<NewItemData>): Promise<Item> => {
+  console.log(`[ItemService API] Updating item ${itemId} with:`, updates);
+  try {
+    const response = await apiClient.put<{ item: Item }>(`/items/${itemId}`, updates);
+    console.log(`[ItemService API] Item ${itemId} updated successfully.`);
+    return response.data.item || response.data; // Adjust
+  } catch (error: any) {
+    console.error(`[ItemService API] Failed to update item ${itemId}:`, error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || `Failed to update item ${itemId}.`);
   }
-  return null;
 };
 
-export const deleteItem = async (itemId: string): Promise<boolean> => {
-  console.log(`[Mobile Service] Deleting item ${itemId}`);
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const initialLength = mockMobileItemsDB.length;
-  mockMobileItemsDB = mockMobileItemsDB.filter(i => i.id !== itemId);
-  return mockMobileItemsDB.length < initialLength;
+/**
+ * Deletes an item by its ID via the backend API.
+ * Requires authentication.
+ * @param itemId The ID of the item to delete.
+ */
+export const deleteItem = async (itemId: string): Promise<void> => {
+  console.log(`[ItemService API] Deleting item ${itemId}`);
+  try {
+    await apiClient.delete(`/items/${itemId}`);
+    console.log(`[ItemService API] Item ${itemId} deleted successfully.`);
+  } catch (error: any) {
+    console.error(`[ItemService API] Failed to delete item ${itemId}:`, error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || `Failed to delete item ${itemId}.`);
+  }
 };
-*/

@@ -16,7 +16,11 @@ app.get('/', (req: Request, res: Response) => {
 import itemRoutes from './routes/itemRoutes';
 app.use('/api/items', itemRoutes);
 
-// TODO: Add other routes (e.g., userRoutes)
+// Add auth routes
+import authRoutes from './routes/authRoutes';
+app.use('/api/auth', authRoutes);
+
+// TODO: Add other general user routes if needed (e.g., /api/users for profile updates not covered by /auth/me)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
