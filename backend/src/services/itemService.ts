@@ -2,16 +2,26 @@
 import Item, { IItem, IItemPhoto, IItemDocument } from '../models/Item'; // Import Mongoose Item model and IItem interface
 import mongoose from 'mongoose'; // For ObjectId validation if needed
 
-// DTO for creating an item. All fields from IItem except auto-generated ones.
-// Ensure this aligns with what the client sends and what the Item schema expects.
-export type CreateItemDTO = Omit<IItem, '_id' | 'createdAt' | 'updatedAt' | 'userId'> & {
-  // Explicitly define optional fields if they are part of the DTO but not strictly required by schema initially
-  // For example, if photos/documents can be added later or are optional:
-  photos?: IItemPhoto[];
-  documents?: IItemDocument[];
+// DTO for creating an item.
+// Includes all fields a user might input when creating a new item.
+// It should align with the IItem interface, excluding server-generated fields like _id, createdAt, updatedAt, userId.
+export type CreateItemDTO = {
+  name: string; // Required
+  category?: string;
+  brand?: string;
+  model?: string;
+  serialNumber?: string;
+  purchaseDate?: Date | string; // Allow string for easier client-side handling, convert to Date in service/controller
+  purchasePrice?: number;
+  currency?: string;
+  retailer?: string;
+  notes?: string;
+  photos?: IItemPhoto[];     // Array of photo objects
+  documents?: IItemDocument[]; // Array of document objects
 };
 
 // DTO for updating an item. All fields are optional.
+// It can include any subset of the fields available in CreateItemDTO.
 export type UpdateItemDTO = Partial<CreateItemDTO>;
 
 
