@@ -25,7 +25,7 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
     console.log('Mock creating item:', mockItem);
     // Simulate service call
     // const item = await itemService.createItem(mockItem, 'mockUserId'); // Old mock
-    const userId = 'user-123'; // Mock user ID, replace with actual auth user ID later
+    const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
     const item = await itemService.createItem(req.body, userId);
 
     res.status(201).json({ message: 'Item created successfully', item: item });
@@ -45,12 +45,11 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
 export const getItems = async (req: Request, res: Response): Promise<void> => {
   try {
     // const userId = (req as any).user.id; // Assuming user ID is attached by auth middleware
-    // const userId = (req as any).user.id; // Assuming user ID is attached by auth middleware
-    const userId = 'user-123'; // Mock user ID
+    const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
     const items = await itemService.getItemsByUserId(userId);
 
     res.status(200).json({ message: 'Items fetched successfully', items: items });
-  } catch (error) {
+  } catch (error)
     console.error('Error fetching items:', error);
     if (error instanceof Error) {
         res.status(500).json({ message: 'Server error fetching items', error: error.message });
@@ -66,10 +65,7 @@ export const getItems = async (req: Request, res: Response): Promise<void> => {
 export const getItemById = async (req: Request, res: Response): Promise<void> => {
   try {
     const itemId = req.params.id;
-    // const userId = (req as any).user.id; // For ownership check
-    const itemId = req.params.id;
-    // const userId = (req as any).user.id; // For ownership check
-    const userId = 'user-123'; // Mock user ID
+    const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
     const item = await itemService.getItemById(itemId, userId);
 
     if (item) {
@@ -94,13 +90,9 @@ export const updateItem = async (req: Request, res: Response): Promise<void> => 
   try {
     const itemId = req.params.id;
     const updates = req.body;
-    // const userId = (req as any).user.id; // For ownership check
-
-    // In a real app, add validation for updates
     const itemId = req.params.id;
     const updates = req.body;
-    // const userId = (req as any).user.id; // For ownership check
-    const userId = 'user-123'; // Mock user ID
+    const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
 
     // In a real app, add validation for updates
     const item = await itemService.updateItem(itemId, updates, userId);
@@ -126,10 +118,7 @@ export const updateItem = async (req: Request, res: Response): Promise<void> => 
 export const deleteItem = async (req: Request, res: Response): Promise<void> => {
   try {
     const itemId = req.params.id;
-    // const userId = (req as any).user.id; // For ownership check
-    const itemId = req.params.id;
-    // const userId = (req as any).user.id; // For ownership check
-    const userId = 'user-123'; // Mock user ID
+    const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
     const success = await itemService.deleteItem(itemId, userId);
 
     if (success) {
