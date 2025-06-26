@@ -4,9 +4,13 @@ dist/
 build/
 coverage/
 *.log
+
+# Environment Variables
+# IMPORTANT: Never commit your actual .env file!
 .env
 .env.*
 !/.env.example
+!/.env.test # Example: if you have a specific .env for tests you want to version (less common)
 
 # React Native
 android/

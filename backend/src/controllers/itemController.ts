@@ -1,7 +1,7 @@
 // backend/src/controllers/itemController.ts
 import { Request, Response } from 'express';
-import * as itemService from '../services/itemService'; // Placeholder for service interactions
-import { Item, createMockItem } from '../models/Item'; // Using Item interface and mock creator
+import * as itemService from '../services/itemService';
+import { IItem } from '../models/Item'; // Import Mongoose IItem interface
 
 // @desc    Create a new item
 // @route   POST /api/items
