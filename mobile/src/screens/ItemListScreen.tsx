@@ -55,18 +55,57 @@ const ItemListScreen: React.FC<Props> = ({ navigation }) => {
     fetchItems();
   }, []);
 
-  const renderItem = ({ item }: { item: Item }) => (
-    <TouchableOpacity
-      className="p-4 mb-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-sm"
-      // onPress={() => navigation.navigate('ItemDetail', { itemId: item.id })} // For future ItemDetailScreen
-      onPress={() => console.log('Navigate to item detail for:', item.name)}
-    >
-      <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{item.name}</Text>
-      {item.category && <Text className="text-sm text-neutral-600 dark:text-neutral-400">Category: {item.category}</Text>}
-      {item.brand && <Text className="text-sm text-neutral-600 dark:text-neutral-400">Brand: {item.brand}</Text>}
-      {item.model && <Text className="text-sm text-neutral-600 dark:text-neutral-400">Model: {item.model}</Text>}
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }: { item: Item }) => {
+    const formattedPurchaseDate = item.purchaseDate
+      ? new Date(item.purchaseDate).toLocaleDateString()
+      : 'N/A';
+
+    return (
+      <TouchableOpacity
+        className="p-4 mb-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-sm active:bg-neutral-100 dark:active:bg-neutral-700"
+        // onPress={() => navigation.navigate('ItemDetail', { itemId: item._id })} // Use item._id for Mongoose
+        onPress={() => console.log('Navigate to item detail for (ID):', item._id)} // Use item._id
+      >
+        <Text className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">{item.name}</Text>
+
+        <View className="flex-row flex-wrap mb-1">
+          {item.category && (
+            <Text className="text-sm text-neutral-700 dark:text-neutral-300 mr-3">
+              <Text className="font-semibold">Category:</Text> {item.category}
+            </Text>
+          )}
+          {item.brand && (
+            <Text className="text-sm text-neutral-700 dark:text-neutral-300">
+              <Text className="font-semibold">Brand:</Text> {item.brand}
+            </Text>
+          )}
+        </View>
+
+        {item.model && <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Model: {item.model}</Text>}
+
+        <View className="border-t border-neutral-200 dark:border-neutral-700 mt-2 pt-2">
+          {item.purchasePrice !== undefined && item.purchasePrice !== null && (
+            <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+              Price: {item.currency || ''} {item.purchasePrice.toLocaleString()}
+            </Text>
+          )}
+          <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+            Purchased: {formattedPurchaseDate}
+          </Text>
+          {item.retailer && (
+            <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+              From: {item.retailer}
+            </Text>
+          )}
+        </View>
+        {/* Minimal display of photos/docs count for example */}
+        {/* <View className="mt-1">
+          {item.photos && item.photos.length > 0 && <Text className="text-xs text-neutral-500 dark:text-neutral-500">{item.photos.length} photo(s)</Text>}
+          {item.documents && item.documents.length > 0 && <Text className="text-xs text-neutral-500 dark:text-neutral-500">{item.documents.length} document(s)</Text>}
+        </View> */}
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -107,7 +146,7 @@ const ItemListScreen: React.FC<Props> = ({ navigation }) => {
           <FlatList
             data={items}
             renderItem={renderItem}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item._id} // Use item._id for Mongoose documents
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         )}
