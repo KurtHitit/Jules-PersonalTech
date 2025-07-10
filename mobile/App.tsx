@@ -1,27 +1,41 @@
-import React from 'react';
-import { SafeAreaView, StatusBar, Text, View } from 'react-native';
-import { NativeWindStyleSheet } from 'nativewind';
+import React from "react";
+import { NativeWindStyleSheet } from "nativewind";
+import AppNavigator from "@/navigation/AppNavigator";
+import { AuthProvider } from "@/context/AuthContext";
+import Toast from "@/components/Toast";
+import { Provider } from "react-redux";
+import { store, persistor } from "./src/store/store";
+import { PersistGate } from "redux-persist/integration/react";
+import * as Linking from "expo-linking";
 
-// This is required for NativeWind to work
+// This is required for NativeWind
 NativeWindStyleSheet.setOutput({
-  default: 'native',
-});
-
-import React from 'react';
-import AppNavigator from '@/navigation/AppNavigator';
-import { AuthProvider } from '@/context/AuthContext';
-import { NativeWindStyleSheet } from 'nativewind';
-
-// Required for NativeWind
-NativeWindStyleSheet.setOutput({
-  default: 'native',
+  default: "native",
 });
 
 const App = () => {
+  const prefix = Linking.createURL('/');
+
+  const linking = {
+    prefixes: [prefix],
+    config: {
+      screens: {
+        ItemList: 'items',
+        ItemDetail: 'items/:itemId',
+        // Add other screens that should be deep linked
+      },
+    },
+  };
+
   return (
-    <AuthProvider>
-      <AppNavigator />
-    </AuthProvider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <AuthProvider>
+          <AppNavigator linking={linking} />
+          <Toast />
+        </AuthProvider>
+      </PersistGate>
+    </Provider>
   );
 };
 
@@ -29,7 +43,7 @@ export default App;
 
 // Previous content for reference if needed:
 // import React from 'react';
-// import { SafeAreaView, StatusBar, Text, View } from 'react-native';
+//
 // import { NativeWindStyleSheet } from 'nativewind';
 
 // NativeWindStyleSheet.setOutput({

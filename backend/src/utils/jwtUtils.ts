@@ -1,7 +1,7 @@
 // backend/src/utils/jwtUtils.ts
 import jwt from 'jsonwebtoken';
 import jwtConfig from '../config/jwtConfig';
-import { User } from '../models/User'; // Assuming User model for payload typing
+import { IUser } from '../models/User'; // Assuming User model for payload typing
 
 export interface AuthTokenPayload {
   userId: string;
@@ -14,7 +14,7 @@ export interface AuthTokenPayload {
  * @param user The user object (or relevant parts) to include in the token payload.
  * @returns The generated JWT string.
  */
-export const generateToken = (user: Pick<User, 'id' | 'email'>): string => {
+export const generateToken = (user: any): string => {
   const payload: AuthTokenPayload = {
     userId: user.id,
     email: user.email,
@@ -22,7 +22,7 @@ export const generateToken = (user: Pick<User, 'id' | 'email'>): string => {
 
   return jwt.sign(payload, jwtConfig.secret, {
     expiresIn: jwtConfig.expiresIn,
-  });
+  } as jwt.SignOptions);
 };
 
 /**

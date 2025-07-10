@@ -12,6 +12,36 @@ export type MainAppStackParamList = {
   ItemList: undefined;
   AddItem: undefined;
   ItemDetail: { itemId: string };
+  Success: undefined;
+  Reminders: undefined;
+  AddReminder: { reminderId?: string };
+  Diagnostic: { itemCategory?: string };
+  ServiceHistory: { itemId: string };
+  AddServiceEntry: { itemId: string; entryId?: string };
+  TechnicianList: undefined;
+  TechnicianDetail: { technicianId: string };
+  Chat: { userId: string; name: string };
+  ConversationList: undefined;
+  GroupList: undefined;
+  GroupDetail: { groupId: string };
+  ForumThreadList: { groupId?: string };
+  ForumThreadDetail: { threadId: string };
+  CreateForumThread: { groupId?: string };
+  NotificationList: undefined;
+  ReviewList: { technicianId: string };
+  CreateReview: { technicianId: string };
+  BadgeCabinet: undefined;
+  Leaderboard: undefined;
+  Profile: undefined;
+  CreateListing: undefined;
+  ListingDetail: { listingId: string };
+  ListingList: undefined;
+  OrderList: undefined;
+  DisputeList: undefined;
+  Referral: undefined;
+  NPSFeedback: undefined;
+  Changelog: undefined;
+  FeatureFlags: undefined;
   // Add other main app screens and their parameters here
   // e.g., Settings: undefined;
   // Profile: undefined;
@@ -22,17 +52,16 @@ export type MainAppStackParamList = {
 // For simplicity, if AppNavigator directly switches between stacks,
 // you might not need a combined RootStackParamList at the AppNavigator level,
 // but individual screens will use their respective stack's param list.
-export type RootStackParamList = AuthStackParamList & MainAppStackParamList & {
-  // This allows navigation from any screen in AuthStack to any screen in MainAppStack or vice-versa
-  // if your navigator is structured to allow that directly.
-  // However, typically you'd navigate to the *name of the stack* e.g. navigation.navigate('MainAppStack').
-  // For now, merging them like this is a common approach for type safety across potential combined navigators.
-  // Consider refining if you use nested navigators explicitly (e.g. Stack.Group).
-
-  // If you have a loading/splash screen at the root before deciding Auth/Main:
-  // InitialLoading: undefined;
-};
-
+export type RootStackParamList = AuthStackParamList &
+  MainAppStackParamList & {
+    // This allows navigation from any screen in AuthStack to any screen in MainAppStack or vice-versa
+    // if your navigator is structured to allow that directly.
+    // However, typically you'd navigate to the *name of the stack* e.g. navigation.navigate('MainAppStack').
+    // For now, merging them like this is a common approach for type safety across potential combined navigators.
+    // Consider refining if you use nested navigators explicitly (e.g. Stack.Group).
+    // If you have a loading/splash screen at the root before deciding Auth/Main:
+    // InitialLoading: undefined;
+  };
 
 // You can also define types for specific navigation props if needed,
 // though often StackNavigationProp from @react-navigation/stack is used directly,

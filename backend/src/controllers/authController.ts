@@ -4,7 +4,7 @@ import * as userService from '../services/userService';
 import User, { IUser, comparePasswordUtility } from '../models/User'; // Import Mongoose User model and IUser
 import { generateToken } from '../utils/jwtUtils';
 // Basic validation, can be replaced with a library like express-validator
-import { validationResult, body } from 'express-validator'; // Example, not fully implemented yet
+
 
 
 // Placeholder for actual validation rules
@@ -153,6 +153,29 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ message: 'Server error fetching profile', error: error.message });
     } else {
         res.status(500).json({ message: 'Server error fetching profile', error: 'Unknown error' });
+    }
+  }
+};
+
+// @desc    Delete authenticated user's account
+// @route   DELETE /api/auth/delete-account
+// @access  Private (will be protected by authMiddleware)
+export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.id; // User ID from authenticated token
+
+  try {
+    const success = await userService.deleteUser(userId);
+    if (success) {
+      res.status(200).json({ message: 'Account and all associated data deleted successfully.' });
+    } else {
+      res.status(404).json({ message: 'User account not found or could not be deleted.' });
+    }
+  } catch (error) {
+    console.error('Error deleting user account:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ message: 'Server error during account deletion', error: error.message });
+    } else {
+      res.status(500).json({ message: 'Server error during account deletion', error: 'Unknown error' });
     }
   }
 };

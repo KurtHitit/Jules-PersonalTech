@@ -20,13 +20,10 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
     // const userId = (req as any).user.id; // Assuming user ID is attached by auth middleware
     // const item = await itemService.createItem(newItemData, userId);
 
-    // Mock implementation:
-    const mockItem = createMockItem(req.body);
-    console.log('Mock creating item:', mockItem);
-    // Simulate service call
-    // const item = await itemService.createItem(mockItem, 'mockUserId'); // Old mock
+    
+    const { name, category, brand, itemModel, serialNumber, purchaseDate, purchasePrice, currency, retailer, notes, warrantyExpirationDate, photos, documents } = req.body;
     const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
-    const item = await itemService.createItem(req.body, userId);
+    const item = await itemService.createItem({ name, category, brand, itemModel, serialNumber, purchaseDate, purchasePrice, currency, retailer, notes, warrantyExpirationDate, photos, documents }, userId);
 
     res.status(201).json({ message: 'Item created successfully', item: item });
   } catch (error) {
@@ -44,12 +41,12 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
 // @access  Private
 export const getItems = async (req: Request, res: Response): Promise<void> => {
   try {
-    // const userId = (req as any).user.id; // Assuming user ID is attached by auth middleware
     const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware
-    const items = await itemService.getItemsByUserId(userId);
+    const searchTerm = req.query.search as string; // Get search term from query parameters
+    const items = await itemService.getItemsByUserId(userId, searchTerm);
 
     res.status(200).json({ message: 'Items fetched successfully', items: items });
-  } catch (error)
+  } catch (error) {
     console.error('Error fetching items:', error);
     if (error instanceof Error) {
         res.status(500).json({ message: 'Server error fetching items', error: error.message });
@@ -88,8 +85,6 @@ export const getItemById = async (req: Request, res: Response): Promise<void> =>
 // @access  Private
 export const updateItem = async (req: Request, res: Response): Promise<void> => {
   try {
-    const itemId = req.params.id;
-    const updates = req.body;
     const itemId = req.params.id;
     const updates = req.body;
     const userId = req.user!.id; // req.user is guaranteed by 'protect' middleware

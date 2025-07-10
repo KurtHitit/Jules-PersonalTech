@@ -1,0 +1,41 @@
+Update Item Model (src/models/Item.ts)
+- Update itemService (src/services/itemService.ts)
+- Update itemController (src/controllers/itemController.ts)
+- Implement File Upload Logic
+- Update Add/Edit Item Screen (src/screens/AddItemScreen.tsx)
+- Update Item Service (src/services/itemService.ts)
+- Update Item List Screen (src/screens/ItemListScreen.tsx)
+- Implemented Warranty Date Picker: Added a date picker for `warrantyExpirationDate` in `AddItemScreen.tsx` and ensured backend compatibility.
+- Implemented Push Notifications: Integrated Expo Push Notifications with a Node.js backend to send notifications for new reminders.
+- Implemented In-app Chat: Set up a WebSocket server, created a Message model, chat service, and chat controller for real-time messaging between users and technicians. Integrated chat UI in the mobile app.
+- Implemented Warranty Badge and Counts: Displayed warranty expiration badge and counts for photos/documents on the item list and detail screens.
+- Implemented Troubleshoot and Service History Navigation: Added navigation from ItemDetailScreen to DiagnosticScreen and ServiceHistoryScreen.
+- Implemented Tabbed Timeline: Added tabbed navigation for events, documents, and photos on the ItemDetailScreen.
+- Implemented Warranty Countdown Badge: Displayed a countdown for warranty expiration on the ItemDetailScreen.
+- Implemented Edit Item Functionality: Added an 'Edit Item' button to ItemDetailScreen and updated AddItemScreen to handle both adding and editing items.
+- Implemented Search Bar: Added a search bar with fuzzy and tag filtering capabilities to the ItemListScreen, with backend support.
+- Implemented Group Directory: Created Group model, service, controller, and routes on the backend. Implemented GroupListScreen and GroupDetailScreen on the mobile app, with navigation.
+- Implemented Forum Threads: Created ForumThread and ForumPost models, service, controller, and routes on the backend. Implemented ForumThreadListScreen and ForumThreadDetailScreen, and CreateForumThreadScreen on the mobile app, with navigation.
+- Implemented Direct Messages: Updated WebSocket server for direct messaging. Enhanced chatService on backend and mobile. Created ConversationListScreen and updated ChatScreen on mobile, with navigation.
+- Implemented Notifications for Mentions/Replies: Added Notification model, service, controller, and routes on the backend. Modified ForumPost model and forumService to create notifications for replies and mentions. Implemented NotificationListScreen on mobile, with navigation.
+- Implemented Tech Reviews Page: Created Review model, service, controller, and routes on the backend. Implemented ReviewListScreen and CreateReviewScreen on mobile, with navigation. Added buttons to TechnicianDetailScreen to view and submit reviews.
+- Implemented Moderation Flag Button: Created Report model, service, controller, and routes on the backend. Added report functionality to ForumThreadDetailScreen and ForumThreadListScreen on mobile.
+- Implemented Rich-text editor (markdown + images): Updated ForumPost model to include images. Modified forumService to handle image URLs. Updated ForumThreadDetailScreen and CreateForumThreadScreen to allow image uploads and display images.
+- Implemented AI Summarizer Banner: Integrated OpenAI API for text summarization. Added a new endpoint to forumController and forumService to generate and cache summaries. Updated ForumThreadDetailScreen to display the summary banner.
+- Implemented XP Progress Bar in Navbar: Created Gamification model, service, controller, and routes on the backend. Updated AppNavigator to display user's XP and level in the navbar.
+- Implemented Badge Cabinet: Created Badge and UserBadge models, badge service, badge controller, and badge routes on the backend. Implemented BadgeCabinetScreen on mobile, with navigation.
+- Implemented Leaderboards: Created leaderboard service, leaderboard controller, and leaderboard routes on the backend. Implemented LeaderboardScreen on mobile, with navigation.
+- Implemented Achievement Toasts: Integrated WebSocket for real-time badge notifications. Created Toast component and toast service on mobile.
+- Implemented Good Owner Score: Added goodOwnerScore to Gamification model, calculated in gamification service, and displayed on ProfileScreen.
+- Implemented Offline Caching: Integrated Redux Persist for item data management.
+- Implemented Biometric Authentication: Integrated `expo-local-authentication` for FaceID/Android authentication on LoginScreen.
+- Implemented Deep Linking: Configured deep linking for navigation to specific screens.
+- Implemented Listing Wizard: Created Listing model, listing service, listing controller, and listing routes on the backend. Implemented CreateListingScreen on mobile.
+- Implemented Stripe Checkout Integration: Created Order model, payment service, and payment controller on the backend. Implemented basic buy now functionality on ListingDetailScreen.
+- Implemented Order History: Created order controller and order routes on the backend. Implemented OrderListScreen on mobile.
+- Implemented Dispute Management: Created Dispute model, dispute service, dispute controller, and dispute routes on the backend. Implemented DisputeListScreen on mobile.
+- Implemented Referral Code Flow: Added referralCode to User model, created referral service, referral controller, and referral routes on the backend. Implemented ReferralScreen on mobile.
+- Implemented In-product NPS Survey: Created NPSFeedback model, nps service, nps controller, and nps routes on the backend. Implemented NPSFeedbackScreen on mobile.
+- Implemented Changelog Drawer: Implemented ChangelogScreen on mobile.
+- Implemented Feature-flag Toggles: Created FeatureFlag model, featureFlag service, featureFlag controller, and featureFlag routes on the backend. Implemented FeatureFlagsScreen on mobile.
+- Implemented Analytics Dashboards: Added a basic `trackEvent` function and integrated it into LoginScreen, RegisterScreen, and AddItemScreen.

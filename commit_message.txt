@@ -1,0 +1,1 @@
+feat: Implement AI summarizer banner and XP progress bar

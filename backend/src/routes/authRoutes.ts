@@ -20,4 +20,9 @@ router.post('/login', authController.loginUser);
 // @access  Private
 router.get('/me', protect, authController.getMe);
 
+// @route   DELETE api/auth/delete-account
+// @desc    Delete authenticated user's account
+// @access  Private
+router.delete('/delete-account', protect, authController.deleteAccount);
+
 export default router;

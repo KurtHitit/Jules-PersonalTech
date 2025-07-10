@@ -8,6 +8,7 @@ export interface IUser extends Document {
   passwordHash: string;
   firstName?: string;
   lastName?: string;
+  referralCode?: string;
   createdAt: Date; // Provided by timestamps
   updatedAt: Date; // Provided by timestamps
   matchPassword(enteredPassword: string): Promise<boolean>; // Instance method for password comparison
@@ -39,6 +40,11 @@ const userSchema: Schema<IUser> = new Schema(
     lastName: {
       type: String,
       trim: true,
+    },
+    referralCode: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values to not violate unique constraint
     },
   },
   {

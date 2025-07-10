@@ -9,13 +9,14 @@ export type CreateItemDTO = {
   name: string; // Required
   category?: string;
   brand?: string;
-  model?: string;
+  itemModel?: string;
   serialNumber?: string;
   purchaseDate?: Date | string; // Allow string for easier client-side handling, convert to Date in service/controller
   purchasePrice?: number;
   currency?: string;
   retailer?: string;
   notes?: string;
+  warrantyExpirationDate?: Date | string;
   photos?: IItemPhoto[];     // Array of photo objects
   documents?: IItemDocument[]; // Array of document objects
 };
@@ -24,6 +25,8 @@ export type CreateItemDTO = {
 // It can include any subset of the fields available in CreateItemDTO.
 export type UpdateItemDTO = Partial<CreateItemDTO>;
 
+
+import { checkAndAwardBadges } from './badgeService';
 
 /**
  * Creates a new item in the database for a specific user.
@@ -41,6 +44,11 @@ export const createItem = async (itemData: CreateItemDTO, userId: string): Promi
 
   await newItem.save();
   console.log(`[ItemService Mongoose] Item created with ID: ${newItem._id}`);
+
+  // Check for badges
+  await checkAndAwardBadges(userId, 'add_first_item');
+  await checkAndAwardBadges(userId, 'add_five_items');
+
   return newItem;
 };
 
@@ -49,13 +57,29 @@ export const createItem = async (itemData: CreateItemDTO, userId: string): Promi
  * @param userId The ID of the user whose items are to be retrieved.
  * @returns A list of item Mongoose documents belonging to the user.
  */
-export const getItemsByUserId = async (userId: string): Promise<IItem[]> => {
-  console.log(`[ItemService Mongoose] Fetching items for user ID: ${userId}`);
+export const getItemsByUserId = async (userId: string, searchTerm?: string): Promise<IItem[]> => {
+  console.log(`[ItemService Mongoose] Fetching items for user ID: ${userId} with search term: ${searchTerm || 'none'}`);
   if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.warn(`[ItemService Mongoose] Invalid ObjectId for userId: ${userId} in getItemsByUserId`);
       return []; // Or throw an error
   }
-  const items = await Item.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 }).exec(); // Sort by newest first
+
+  const query: any = { userId: new mongoose.Types.ObjectId(userId) };
+
+  if (searchTerm) {
+    const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive search
+    query.$or = [
+      { name: { $regex: searchRegex } },
+      { category: { $regex: searchRegex } },
+      { brand: { $regex: searchRegex } },
+      { itemModel: { $regex: searchRegex } },
+      { serialNumber: { $regex: searchRegex } },
+      { retailer: { $regex: searchRegex } },
+      { notes: { $regex: searchRegex } },
+    ];
+  }
+
+  const items = await Item.find(query).sort({ createdAt: -1 }).exec(); // Sort by newest first
   console.log(`[ItemService Mongoose] Found ${items.length} items for user ${userId}.`);
   return items;
 };

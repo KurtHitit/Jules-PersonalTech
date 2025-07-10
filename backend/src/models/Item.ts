@@ -23,7 +23,7 @@ export interface IItemDocument {
   uploadedAt?: Date;
 }
 
-const itemDocumentSchema: Schema<IItemDocument> = new Schema({
+export const itemDocumentSchema: Schema<IItemDocument> = new Schema({
   url: { type: String, required: true },
   filename: { type: String, required: true },
   type: {
@@ -41,13 +41,14 @@ export interface IItem extends Document {
   name: string;
   category?: string;
   brand?: string;
-  model?: string;
+  itemModel?: string;
   serialNumber?: string;
   purchaseDate?: Date;
   purchasePrice?: number;
   currency?: string; // e.g., USD, EUR
   retailer?: string;
   notes?: string;
+  warrantyExpirationDate?: Date;
   photos?: IItemPhoto[]; // Array of photo subdocuments
   documents?: IItemDocument[]; // Array of document subdocuments
   createdAt: Date; // Provided by timestamps
@@ -68,13 +69,14 @@ const itemSchema: Schema<IItem> = new Schema(
     },
     category: { type: String, trim: true },
     brand: { type: String, trim: true },
-    model: { type: String, trim: true },
+    itemModel: { type: String, trim: true },
     serialNumber: { type: String, trim: true },
     purchaseDate: { type: Date },
     purchasePrice: { type: Number, min: 0 },
     currency: { type: String, trim: true, uppercase: true, maxlength: 3 },
     retailer: { type: String, trim: true },
     notes: { type: String, trim: true },
+    warrantyExpirationDate: { type: Date },
     photos: [itemPhotoSchema], // Embed the photo schema as an array
     documents: [itemDocumentSchema], // Embed the document schema as an array
   },
